@@ -108,3 +108,16 @@ if os.path.exists(OUTPUT_FILE):
             file_name="expert_scores.csv",
             mime="text/csv"
         )
+
+# ==== RESET DATA OPTION (Admin Use) ====
+st.markdown("---")
+if st.checkbox("⚠️ Show admin options"):
+    if st.button("🔄 Reset Data"):
+        # Clear CSV
+        pd.DataFrame(columns=["Expert", "Video", "Exercise", "Form_Label", "Score"]).to_csv(OUTPUT_FILE, index=False)
+        
+        # Reset session state
+        st.session_state.video_queue = []
+        st.session_state.index = 0
+
+        st.success("✅ All data has been reset. Restart the app to begin fresh.")
