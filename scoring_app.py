@@ -8,17 +8,19 @@ VIDEO_CSV = "videos.csv"  # must have columns: Exercise, Video_Name, URL
 OUTPUT_FILE = "expert_scores.csv"
 
 # ==== LOAD VIDEO LIST ====
-if os.path.exists(VIDEO_CSV):
-    video_df = pd.read_csv(VIDEO_CSV)
-else:
-    st.error("❌ videos.csv not found. Please upload the file with Exercise, Video_Name, URL.")
-    st.stop()
-
 if "video_queue" not in st.session_state or not st.session_state.video_queue:
-    video_list = video_df.to_dict("records")   # each row is a dict
+    video_df = pd.read_csv("videos.csv", sep="\t")  # tab-delimited CSV
+    video_list = video_df.to_dict("records")
     random.shuffle(video_list)
     st.session_state.video_queue = video_list
     st.session_state.index = 0
+
+current_video = st.session_state.video_queue[st.session_state.index]
+exercise_type = current_video["Exercise"]
+video_url = current_video["URL"]
+
+st.subheader(f"{exercise_type} - {current_video['Video_Name']}")
+st.video(video_url)
 
 # ==== CSV INIT ====
 if not os.path.exists(OUTPUT_FILE):
