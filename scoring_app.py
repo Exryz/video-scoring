@@ -46,6 +46,10 @@ if expert_name and st.session_state.index < len(st.session_state.video_queue):
     video_path = st.session_state.video_queue[st.session_state.index]
     exercise_type = video_path.split("/")[0]
 
+    progress = (st.session_state.index + 1) / len(st.session_state.video_queue)
+    st.progress(progress)
+    st.caption(f"Progress: {st.session_state.index+1} of {len(st.session_state.video_queue)} videos")
+
     st.subheader(f"Video {st.session_state.index+1} of {len(st.session_state.video_queue)}")
     st.video(os.path.join(VIDEO_FOLDER, video_path))
 
@@ -62,6 +66,7 @@ if expert_name and st.session_state.index < len(st.session_state.video_queue):
     )
 
     if st.button("💾 Save & Next", key=f"save_{st.session_state.index}"):
+        # Save entry
         new_entry = pd.DataFrame([{
             "Expert": expert_name,
             "Video": video_path,
@@ -75,8 +80,6 @@ if expert_name and st.session_state.index < len(st.session_state.video_queue):
 
         # Advance to next video
         st.session_state.index += 1
-
-        # Success message
         st.success("✅ Score saved! Next video loading...")
 
 else:
@@ -84,3 +87,13 @@ else:
         st.success("🎉 All videos reviewed. Thank you for your evaluation!")
     else:
         st.warning("Please enter your name/ID to begin.")
+
+# ==== DOWNLOAD CSV ====
+if os.path.exists(OUTPUT_FILE):
+    with open(OUTPUT_FILE, "rb") as f:
+        st.download_button(
+            "📥 Download All Scores",
+            f,
+            file_name="expert_scores.csv",
+            mime="text/csv"
+        )
