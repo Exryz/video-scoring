@@ -5,9 +5,19 @@ import random
 from collections import defaultdict
 
 # ==== CONFIG ====
-VIDEO_FOLDER = "videos"
-OUTPUT_FILE = "expert_scores.csv"
-EXERCISE_GROUPS = ["deadlift", "clean_press", "sprint"]
+video_df = pd.read_csv("videos.csv")  # contains Exercise, Video_Name, URL
+if "video_queue" not in st.session_state or not st.session_state.video_queue:
+    video_list = video_df.to_dict("records")
+    random.shuffle(video_list)
+    st.session_state.video_queue = video_list
+    st.session_state.index = 0
+
+current_video = st.session_state.video_queue[st.session_state.index]
+exercise_type = current_video["Exercise"]
+video_url = current_video["URL"]
+
+st.video(video_url)
+
 
 # ==== SESSION STATE INIT ====
 if "video_queue" not in st.session_state:
