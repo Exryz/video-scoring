@@ -7,15 +7,21 @@ import os
 VIDEO_CSV = "videos.csv"  # tab-delimited file with Exercise, Video_Name, URL
 OUTPUT_FILE = "expert_scores.csv"
 
+# ==== FUNCTIONS ====
+def convert_to_preview(url):
+    """Convert Google Drive download links to preview links."""
+    if "uc?export=download&id=" in url:
+        file_id = url.split("id=")[-1]
+        return f"https://drive.google.com/file/d/{file_id}/preview"
+    return url
+
 # ==== LOAD VIDEO LIST ====
 if not os.path.exists(VIDEO_CSV):
     st.error("❌ videos.csv not found. Please upload the file with Exercise, Video_Name, URL.")
     st.stop()
 
+# Use auto-detect for delimiter
 video_df = pd.read_csv(VIDEO_CSV, sep=None, engine="python")
-video_df.columns = video_df.columns.str.strip().str.lower()
-
-# Clean headers (strip spaces + lowercase)
 video_df.columns = video_df.columns.str.strip().str.lower()
 
 # Ensure correct columns exist
@@ -24,8 +30,11 @@ if not required_cols.issubset(set(video_df.columns)):
     st.error(f"❌ videos.csv must have columns: {required_cols}. Found: {set(video_df.columns)}")
     st.stop()
 
+# Convert Drive links for playback
+video_df["url"] = video_df["url"].apply(convert_to_preview)
+
 if "video_queue" not in st.session_state or not st.session_state.video_queue:
-    video_list = video_df.to_dict("records")   # each row is a dict
+    video_list = video_df.to_dict("records")
     random.shuffle(video_list)
     st.session_state.video_queue = video_list
     st.session_state.index = 0
