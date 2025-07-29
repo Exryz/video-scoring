@@ -9,8 +9,16 @@ VIDEO_FOLDER = "videos"   # Folder containing exercise subfolders
 OUTPUT_FILE = "expert_scores.csv"
 EXERCISE_GROUPS = ["deadlift", "clean_press", "sprint"]  # Subfolders under videos/
 
-# Load or initialize scoring progress
+# ==== SESSION STATE INITIALIZATION ====
 if "video_queue" not in st.session_state:
+    st.session_state.video_queue = []
+if "index" not in st.session_state:
+    st.session_state.index = 0
+if "just_saved" not in st.session_state:
+    st.session_state.just_saved = False
+
+# ==== BUILD VIDEO QUEUE IF EMPTY ====
+if not st.session_state.video_queue:
     grouped_videos = defaultdict(list)
     for group in EXERCISE_GROUPS:
         folder_path = os.path.join(VIDEO_FOLDER, group)
@@ -28,20 +36,16 @@ if "video_queue" not in st.session_state:
 
     st.session_state.video_queue = video_queue
     st.session_state.index = 0
-    st.session_state.just_saved = False
 
-# Initialize CSV if not exists
+# ==== CSV INITIALIZATION ====
 if not os.path.exists(OUTPUT_FILE):
     pd.DataFrame(columns=["Expert", "Video", "Exercise", "Form_Label", "Score"]).to_csv(OUTPUT_FILE, index=False)
 
+# ==== APP UI ====
 st.title("🏋️ Exercise Form Scoring App")
 expert_name = st.text_input("Enter your name/ID:")
 
 if expert_name and st.session_state.index < len(st.session_state.video_queue):
-    # If we just saved, immediately go to the next video
-    if st.session_state.just_saved:
-        st.session_state.just_saved = False
-
     video_path = st.session_state.video_queue[st.session_state.index]
     exercise_type = video_path.split("/")[0]
 
@@ -61,7 +65,6 @@ if expert_name and st.session_state.index < len(st.session_state.video_queue):
     )
 
     if st.button("💾 Save & Next"):
-        # Save entry
         new_entry = pd.DataFrame([{
             "Expert": expert_name,
             "Video": video_path,
@@ -73,10 +76,13 @@ if expert_name and st.session_state.index < len(st.session_state.video_queue):
         df = pd.concat([df, new_entry], ignore_index=True)
         df.to_csv(OUTPUT_FILE, index=False)
 
-        # Move to next video
+        # Update session state
         st.session_state.index += 1
         st.session_state.just_saved = True
-        st.experimental_set_query_params(next=str(st.session_state.index))  # triggers refresh
+
+        # Force UI update
+        st.success("✅ Score saved! Loading next video...")
+        st.experimental_set_query_params(dummy=str(st.session_state.index))
         st.stop()
 
 else:
