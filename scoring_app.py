@@ -4,34 +4,22 @@ import random
 import os
 
 # ==== CONFIG ====
-VIDEO_CSV = "videos.csv"  # tab-delimited file with Exercise, Video_Name, URL
+VIDEO_CSV = "videos.csv"  # tab or comma delimited with Exercise, Video_Name, URL
 OUTPUT_FILE = "expert_scores.csv"
-
-# ==== FUNCTIONS ====
-def convert_to_preview(url):
-    """Convert Google Drive download links to preview links."""
-    if "uc?export=download&id=" in url:
-        file_id = url.split("id=")[-1]
-        return f"https://drive.google.com/file/d/{file_id}/preview"
-    return url
 
 # ==== LOAD VIDEO LIST ====
 if not os.path.exists(VIDEO_CSV):
     st.error("❌ videos.csv not found. Please upload the file with Exercise, Video_Name, URL.")
     st.stop()
 
-# Use auto-detect for delimiter
+# Auto-detect separator (tab or comma)
 video_df = pd.read_csv(VIDEO_CSV, sep=None, engine="python")
 video_df.columns = video_df.columns.str.strip().str.lower()
 
-# Ensure correct columns exist
 required_cols = {"exercise", "video_name", "url"}
 if not required_cols.issubset(set(video_df.columns)):
     st.error(f"❌ videos.csv must have columns: {required_cols}. Found: {set(video_df.columns)}")
     st.stop()
-
-# Convert Drive links for playback
-video_df["url"] = video_df["url"].apply(convert_to_preview)
 
 if "video_queue" not in st.session_state or not st.session_state.video_queue:
     video_list = video_df.to_dict("records")
@@ -59,7 +47,17 @@ if expert_name and st.session_state.index < len(st.session_state.video_queue):
     st.caption(f"Progress: {st.session_state.index+1} of {len(st.session_state.video_queue)} videos")
 
     st.subheader(f"Video {st.session_state.index+1}: {exercise_type} - {video_name}")
-    st.video(video_url)
+
+    # Embed Google Drive video with iframe
+    if "file/d/" in video_url:
+        iframe_code = f'<iframe src="{video_url}" width="640" height="480" allow="autoplay"></iframe>'
+    elif "uc?export=download&id=" in video_url:
+        file_id = video_url.split("id=")[-1]
+        iframe_code = f'<iframe src="https://drive.google.com/file/d/{file_id}/preview" width="640" height="480" allow="autoplay"></iframe>'
+    else:
+        iframe_code = f'<video width="640" height="480" controls><source src="{video_url}" type="video/mp4"></video>'
+    
+    st.markdown(iframe_code, unsafe_allow_html=True)
 
     form_label = st.radio("Form Classification", ["Good Form", "Bad Form"])
     score = st.slider("Form Quality Score (0–100)", 0, 100, 75)
