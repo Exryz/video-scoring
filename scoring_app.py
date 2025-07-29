@@ -99,13 +99,19 @@ else:
     else:
         st.warning("Please enter your name/ID to begin.")
 
-# ==== DOWNLOAD CSV ====
-if os.path.exists(OUTPUT_FILE):
-    with open(OUTPUT_FILE, "rb") as f:
+# ==== DOWNLOAD CSV FOR CURRENT EXPERT ====
+if expert_name and os.path.exists(OUTPUT_FILE):
+    df = pd.read_csv(OUTPUT_FILE)
+    expert_df = df[df["Expert"] == expert_name]
+
+    if expert_df.empty:
+        st.info("ℹ️ No scores recorded yet for your ID.")
+    else:
+        csv = expert_df.to_csv(index=False).encode('utf-8')
         st.download_button(
-            "📥 Download All Scores",
-            f,
-            file_name="expert_scores.csv",
+            f"📥 Download Your Scores ({len(expert_df)} entries)",
+            csv,
+            file_name=f"{expert_name}_scores.csv",
             mime="text/csv"
         )
 
