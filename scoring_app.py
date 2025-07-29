@@ -12,7 +12,8 @@ if not os.path.exists(VIDEO_CSV):
     st.error("❌ videos.csv not found. Please upload the file with Exercise, Video_Name, URL.")
     st.stop()
 
-video_df = pd.read_csv(VIDEO_CSV, sep="\t")
+video_df = pd.read_csv(VIDEO_CSV, sep=None, engine="python")
+video_df.columns = video_df.columns.str.strip().str.lower()
 
 # Clean headers (strip spaces + lowercase)
 video_df.columns = video_df.columns.str.strip().str.lower()
