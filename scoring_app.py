@@ -82,7 +82,7 @@ if expert_name and st.session_state.index < len(st.session_state.video_queue):
 
         # Force UI update
         st.success("✅ Score saved! Loading next video...")
-        st.experimental_set_query_params(dummy=str(st.session_state.index))
+        st.set_query_params(dummy=str(st.session_state.index))
         st.stop()
 
 else:
