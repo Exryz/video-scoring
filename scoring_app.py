@@ -28,6 +28,7 @@ if "video_queue" not in st.session_state:
 
     st.session_state.video_queue = video_queue
     st.session_state.index = 0
+    st.session_state.just_saved = False
 
 # Initialize CSV if not exists
 if not os.path.exists(OUTPUT_FILE):
@@ -37,6 +38,10 @@ st.title("🏋️ Exercise Form Scoring App")
 expert_name = st.text_input("Enter your name/ID:")
 
 if expert_name and st.session_state.index < len(st.session_state.video_queue):
+    # If we just saved, immediately go to the next video
+    if st.session_state.just_saved:
+        st.session_state.just_saved = False
+
     video_path = st.session_state.video_queue[st.session_state.index]
     exercise_type = video_path.split("/")[0]
 
@@ -68,9 +73,11 @@ if expert_name and st.session_state.index < len(st.session_state.video_queue):
         df = pd.concat([df, new_entry], ignore_index=True)
         df.to_csv(OUTPUT_FILE, index=False)
 
-        # Move to next video and trigger rerun
+        # Move to next video
         st.session_state.index += 1
-        st.experimental_rerun()   # safe to use here for fresh load
+        st.session_state.just_saved = True
+        st.experimental_set_query_params(next=str(st.session_state.index))  # triggers refresh
+        st.stop()
 
 else:
     if expert_name:
