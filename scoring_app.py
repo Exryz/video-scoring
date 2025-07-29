@@ -58,7 +58,7 @@ if expert_name and st.session_state.index < len(st.session_state.video_queue):
         key=f"score_{st.session_state.index}"
     )
 
-    if st.button("Save Score"):
+    if st.button("💾 Save & Next"):
         # Save entry
         new_entry = pd.DataFrame([{
             "Expert": expert_name,
@@ -71,13 +71,10 @@ if expert_name and st.session_state.index < len(st.session_state.video_queue):
         df = pd.concat([df, new_entry], ignore_index=True)
         df.to_csv(OUTPUT_FILE, index=False)
 
-        # Confirm saved
-        st.success(f"✅ Score saved for {video_path}")
+        # Move to next video
+        st.session_state.index += 1
+        st.experimental_set_query_params(dummy=str(st.session_state.index))  # force refresh
 
-        # Add "Next Video" button
-        if st.button("➡️ Next Video"):
-            st.session_state.index += 1
-            st.experimental_set_query_params()  # lightweight refresh
 else:
     if expert_name:
         st.success("🎉 All videos reviewed. Thank you for your evaluation!")
