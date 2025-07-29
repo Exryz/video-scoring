@@ -4,23 +4,15 @@ import random
 import os
 
 # ==== CONFIG ====
-VIDEO_CSV = "videos.csv"
+VIDEO_CSV = "videos.csv"  # tab or comma delimited with Exercise, Video_Name, URL
 OUTPUT_FILE = "expert_scores.csv"
-BATCH_SIZE = 20   # number of videos per session before a break reminder
-
-MOTIVATIONAL_QUOTES = [
-    "🔥 Keep pushing — your effort matters!",
-    "💪 You're making great progress!",
-    "🏆 Every video you score helps us improve training!",
-    "🚀 You're almost there — stay strong!",
-    "👏 Amazing focus! Keep it up!"
-]
 
 # ==== LOAD VIDEO LIST ====
 if not os.path.exists(VIDEO_CSV):
     st.error("❌ videos.csv not found. Please upload the file with Exercise, Video_Name, URL.")
     st.stop()
 
+# Auto-detect separator (tab or comma)
 video_df = pd.read_csv(VIDEO_CSV, sep=None, engine="python")
 video_df.columns = video_df.columns.str.strip().str.lower()
 
@@ -41,73 +33,62 @@ if not os.path.exists(OUTPUT_FILE):
 
 # ==== APP ====
 st.title("🏋️ Exercise Form Scoring App")
-expert_name = st.text_input("Enter your name/ID:")
+expert_name = st.text_input("Enter your name/ID (e.g., EXP01, EXP02, EXP03):")
 
-if expert_name:
-    df = pd.read_csv(OUTPUT_FILE)
-    # Resume from checkpoint if exists
-    last_index = df[df["Expert"] == expert_name].shape[0]
-    if last_index > st.session_state.index:
-        st.session_state.index = last_index
+if expert_name and st.session_state.index < len(st.session_state.video_queue):
+    current_video = st.session_state.video_queue[st.session_state.index]
+    exercise_type = current_video["exercise"]
+    video_url = current_video["url"]
+    video_name = current_video["video_name"]
 
-    total_videos = len(st.session_state.video_queue)
+    # Progress bar
+    progress = (st.session_state.index + 1) / len(st.session_state.video_queue)
+    st.progress(progress)
+    st.caption(f"Progress: {st.session_state.index+1} of {len(st.session_state.video_queue)} videos")
 
-    if st.session_state.index < total_videos:
-        current_video = st.session_state.video_queue[st.session_state.index]
-        exercise_type = current_video["exercise"]
-        video_url = current_video["url"]
-        video_name = current_video["video_name"]
+    st.subheader(f"Video {st.session_state.index+1}: {exercise_type} - {video_name}")
 
-        # Progress bar
-        progress = (st.session_state.index + 1) / total_videos
-        st.progress(progress)
-        st.caption(f"Progress: {st.session_state.index+1} of {total_videos} videos")
-
-        # Motivational text
-        if (st.session_state.index + 1) % 10 == 0:
-            st.info(random.choice(MOTIVATIONAL_QUOTES))
-
-        # Break reminder
-        if (st.session_state.index + 1) % BATCH_SIZE == 0:
-            st.warning("💡 Time for a quick 2-minute break! Stretch and rest your eyes before continuing.")
-
-        st.subheader(f"Video {st.session_state.index+1}: {exercise_type} - {video_name}")
-
-        # Use iframe for Google Drive video
-        if "file/d/" in video_url:
-            iframe_code = f'<iframe src="{video_url}" width="640" height="480" allow="autoplay"></iframe>'
-        elif "uc?export=download&id=" in video_url:
-            file_id = video_url.split("id=")[-1]
-            iframe_code = f'<iframe src="https://drive.google.com/file/d/{file_id}/preview" width="640" height="480" allow="autoplay"></iframe>'
-        else:
-            iframe_code = f'<video width="640" height="480" controls><source src="{video_url}" type="video/mp4"></video>'
-        
-        st.markdown(iframe_code, unsafe_allow_html=True)
-
-        # Scoring
-        form_label = st.radio("Form Classification", ["Good Form", "Bad Form"])
-        score = st.slider("Form Quality Score (0–100)", 0, 100, 75)
-
-        if st.button("💾 Save & Next"):
-            # Save score
-            exists = df[(df["Expert"] == expert_name) & (df["Video"] == video_name)]
-            if exists.empty:
-                new_entry = pd.DataFrame([{
-                    "Expert": expert_name,
-                    "Video": video_name,
-                    "Exercise": exercise_type,
-                    "Form_Label": form_label,
-                    "Score": score
-                }])
-                df = pd.concat([df, new_entry], ignore_index=True)
-                df.to_csv(OUTPUT_FILE, index=False)
-
-            st.success("✅ Score saved!")
-            st.session_state.index += 1
-            st.experimental_rerun()  # auto-advance after saving
-
+    # Embed Google Drive video with iframe
+    if "file/d/" in video_url:
+        iframe_code = f'<iframe src="{video_url}" width="640" height="480" allow="autoplay"></iframe>'
+    elif "uc?export=download&id=" in video_url:
+        file_id = video_url.split("id=")[-1]
+        iframe_code = f'<iframe src="https://drive.google.com/file/d/{file_id}/preview" width="640" height="480" allow="autoplay"></iframe>'
     else:
-        st.success("🎉 All videos reviewed. Thank you for your evaluation!")
+        iframe_code = f'<video width="640" height="480" controls><source src="{video_url}" type="video/mp4"></video>'
+    
+    st.markdown(iframe_code, unsafe_allow_html=True)
+
+    form_label = st.radio("Form Classification", ["Good Form", "Bad Form"])
+    score = st.slider("Form Quality Score (0–100)", 0, 100, 75)
+
+    if st.button("💾 Save & Next"):
+        df = pd.read_csv(OUTPUT_FILE)
+
+        # Check for duplicate entry
+        exists = df[(df["Expert"] == expert_name) & (df["Video"] == video_name)]
+
+        if not exists.empty:
+            st.warning("⚠️ You already scored this video. Skipping...")
+            st.session_state.index += 1
+        else:
+            new_entry = pd.DataFrame([{
+                "Expert": expert_name,
+                "Video": video_name,
+                "Exercise": exercise_type,
+                "Form_Label": form_label,
+                "Score": score
+            }])
+            df = pd.concat([df, new_entry], ignore_index=True)
+            df.to_csv(OUTPUT_FILE, index=False)
+
+            st.success("✅ Score saved! Next video loading...")
+            st.session_state.index += 1
+
+elif expert_name:
+    st.success("🎉 All videos reviewed. Thank you for your evaluation!")
+else:
+    st.warning("Please enter your name/ID to begin.")
 
 # ==== DOWNLOAD CSV FOR CURRENT EXPERT ====
 if expert_name and os.path.exists(OUTPUT_FILE):
