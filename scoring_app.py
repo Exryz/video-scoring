@@ -5,17 +5,15 @@ import random
 from collections import defaultdict
 
 # ==== CONFIG ====
-VIDEO_FOLDER = "videos"   # Folder containing exercise subfolders
+VIDEO_FOLDER = "videos"
 OUTPUT_FILE = "expert_scores.csv"
-EXERCISE_GROUPS = ["deadlift", "clean_press", "sprint"]  # Subfolders under videos/
+EXERCISE_GROUPS = ["deadlift", "clean_press", "sprint"]
 
-# ==== SESSION STATE INITIALIZATION ====
+# ==== SESSION STATE INIT ====
 if "video_queue" not in st.session_state:
     st.session_state.video_queue = []
 if "index" not in st.session_state:
     st.session_state.index = 0
-if "just_saved" not in st.session_state:
-    st.session_state.just_saved = False
 
 # ==== BUILD VIDEO QUEUE IF EMPTY ====
 if not st.session_state.video_queue:
@@ -35,9 +33,8 @@ if not st.session_state.video_queue:
         video_queue.extend(grouped_videos[group])
 
     st.session_state.video_queue = video_queue
-    st.session_state.index = 0
 
-# ==== CSV INITIALIZATION ====
+# ==== CSV INIT ====
 if not os.path.exists(OUTPUT_FILE):
     pd.DataFrame(columns=["Expert", "Video", "Exercise", "Form_Label", "Score"]).to_csv(OUTPUT_FILE, index=False)
 
@@ -64,7 +61,7 @@ if expert_name and st.session_state.index < len(st.session_state.video_queue):
         key=f"score_{st.session_state.index}"
     )
 
-    if st.button("💾 Save & Next"):
+    if st.button("💾 Save & Next", key=f"save_{st.session_state.index}"):
         new_entry = pd.DataFrame([{
             "Expert": expert_name,
             "Video": video_path,
@@ -76,14 +73,11 @@ if expert_name and st.session_state.index < len(st.session_state.video_queue):
         df = pd.concat([df, new_entry], ignore_index=True)
         df.to_csv(OUTPUT_FILE, index=False)
 
-        # Update session state
+        # Advance to next video
         st.session_state.index += 1
-        st.session_state.just_saved = True
 
-        # Force UI update
-        st.success("✅ Score saved! Loading next video...")
-        st.set_query_params(dummy=str(st.session_state.index))
-        st.stop()
+        # Success message
+        st.success("✅ Score saved! Next video loading...")
 
 else:
     if expert_name:
