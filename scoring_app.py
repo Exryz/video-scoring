@@ -4,23 +4,30 @@ import random
 import os
 
 # ==== CONFIG ====
-VIDEO_CSV = "videos.csv"  # must have columns: Exercise, Video_Name, URL
+VIDEO_CSV = "videos.csv"  # tab-delimited file with Exercise, Video_Name, URL
 OUTPUT_FILE = "expert_scores.csv"
 
 # ==== LOAD VIDEO LIST ====
+if not os.path.exists(VIDEO_CSV):
+    st.error("❌ videos.csv not found. Please upload the file with Exercise, Video_Name, URL.")
+    st.stop()
+
+video_df = pd.read_csv(VIDEO_CSV, sep="\t")
+
+# Clean headers (strip spaces + lowercase)
+video_df.columns = video_df.columns.str.strip().str.lower()
+
+# Ensure correct columns exist
+required_cols = {"exercise", "video_name", "url"}
+if not required_cols.issubset(set(video_df.columns)):
+    st.error(f"❌ videos.csv must have columns: {required_cols}. Found: {set(video_df.columns)}")
+    st.stop()
+
 if "video_queue" not in st.session_state or not st.session_state.video_queue:
-    video_df = pd.read_csv("videos.csv", sep="\t")  # tab-delimited CSV
-    video_list = video_df.to_dict("records")
+    video_list = video_df.to_dict("records")   # each row is a dict
     random.shuffle(video_list)
     st.session_state.video_queue = video_list
     st.session_state.index = 0
-
-current_video = st.session_state.video_queue[st.session_state.index]
-exercise_type = current_video["Exercise"]
-video_url = current_video["URL"]
-
-st.subheader(f"{exercise_type} - {current_video['Video_Name']}")
-st.video(video_url)
 
 # ==== CSV INIT ====
 if not os.path.exists(OUTPUT_FILE):
@@ -32,15 +39,16 @@ expert_name = st.text_input("Enter your name/ID (e.g., EXP01, EXP02, EXP03):")
 
 if expert_name and st.session_state.index < len(st.session_state.video_queue):
     current_video = st.session_state.video_queue[st.session_state.index]
-    exercise_type = current_video["Exercise"]
-    video_url = current_video["URL"]
+    exercise_type = current_video["exercise"]
+    video_url = current_video["url"]
+    video_name = current_video["video_name"]
 
     # Progress bar
     progress = (st.session_state.index + 1) / len(st.session_state.video_queue)
     st.progress(progress)
     st.caption(f"Progress: {st.session_state.index+1} of {len(st.session_state.video_queue)} videos")
 
-    st.subheader(f"Video {st.session_state.index+1}: {exercise_type} - {current_video['Video_Name']}")
+    st.subheader(f"Video {st.session_state.index+1}: {exercise_type} - {video_name}")
     st.video(video_url)
 
     form_label = st.radio("Form Classification", ["Good Form", "Bad Form"])
@@ -49,8 +57,8 @@ if expert_name and st.session_state.index < len(st.session_state.video_queue):
     if st.button("💾 Save & Next"):
         df = pd.read_csv(OUTPUT_FILE)
 
-        # Check for duplicate
-        exists = df[(df["Expert"] == expert_name) & (df["Video"] == current_video["Video_Name"])]
+        # Check for duplicate entry
+        exists = df[(df["Expert"] == expert_name) & (df["Video"] == video_name)]
 
         if not exists.empty:
             st.warning("⚠️ You already scored this video. Skipping...")
@@ -58,7 +66,7 @@ if expert_name and st.session_state.index < len(st.session_state.video_queue):
         else:
             new_entry = pd.DataFrame([{
                 "Expert": expert_name,
-                "Video": current_video["Video_Name"],
+                "Video": video_name,
                 "Exercise": exercise_type,
                 "Form_Label": form_label,
                 "Score": score
