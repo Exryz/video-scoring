@@ -33,7 +33,7 @@ if not os.path.exists(OUTPUT_FILE):
 
 # ==== APP ====
 st.title("🏋️ Exercise Form Scoring App")
-expert_name = st.text_input("Enter your name (e.g., Airnell, Chris, Andrea):")
+expert_name = st.text_input("Enter your name (e.g., Airnel, Chris, Andrea):")
 
 if expert_name and st.session_state.index < len(st.session_state.video_queue):
     current_video = st.session_state.video_queue[st.session_state.index]
