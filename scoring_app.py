@@ -40,12 +40,13 @@ if not os.path.exists(OUTPUT_FILE):
 
 # ==== APP UI ====
 st.title("🏋️ Exercise Form Scoring App")
-expert_name = st.text_input("Enter your name/ID:")
+expert_name = st.text_input("Enter your name/ID (e.g., EXP01, EXP02, EXP03):")
 
 if expert_name and st.session_state.index < len(st.session_state.video_queue):
     video_path = st.session_state.video_queue[st.session_state.index]
     exercise_type = video_path.split("/")[0]
 
+    # Progress bar
     progress = (st.session_state.index + 1) / len(st.session_state.video_queue)
     st.progress(progress)
     st.caption(f"Progress: {st.session_state.index+1} of {len(st.session_state.video_queue)} videos")
@@ -66,21 +67,31 @@ if expert_name and st.session_state.index < len(st.session_state.video_queue):
     )
 
     if st.button("💾 Save & Next", key=f"save_{st.session_state.index}"):
-        # Save entry
-        new_entry = pd.DataFrame([{
-            "Expert": expert_name,
-            "Video": video_path,
-            "Exercise": exercise_type,
-            "Form_Label": form_label,
-            "Score": score
-        }])
         df = pd.read_csv(OUTPUT_FILE)
-        df = pd.concat([df, new_entry], ignore_index=True)
-        df.to_csv(OUTPUT_FILE, index=False)
 
-        # Advance to next video
-        st.session_state.index += 1
-        st.success("✅ Score saved! Next video loading...")
+        # Check for duplicate entry
+        exists = df[
+            (df["Expert"] == expert_name) & 
+            (df["Video"] == video_path)
+        ]
+
+        if not exists.empty:
+            st.warning("⚠️ You already scored this video. Skipping to next...")
+            st.session_state.index += 1
+        else:
+            # Save new entry
+            new_entry = pd.DataFrame([{
+                "Expert": expert_name,
+                "Video": video_path,
+                "Exercise": exercise_type,
+                "Form_Label": form_label,
+                "Score": score
+            }])
+            df = pd.concat([df, new_entry], ignore_index=True)
+            df.to_csv(OUTPUT_FILE, index=False)
+
+            st.success("✅ Score saved! Next video loading...")
+            st.session_state.index += 1
 
 else:
     if expert_name:
