@@ -11,20 +11,17 @@ EXERCISE_GROUPS = ["deadlift", "clean_press", "sprint"]  # Subfolders under vide
 
 # Load or initialize scoring progress
 if "video_queue" not in st.session_state:
-    # Gather videos grouped by exercise
     grouped_videos = defaultdict(list)
     for group in EXERCISE_GROUPS:
         folder_path = os.path.join(VIDEO_FOLDER, group)
         if os.path.exists(folder_path):
             files = [f for f in os.listdir(folder_path) if f.endswith(('.mp4', '.mov', '.avi'))]
-            random.shuffle(files)  # Randomize order within group
+            random.shuffle(files)
             grouped_videos[group] = [os.path.join(group, f) for f in files]
 
-    # Shuffle group order
     group_order = EXERCISE_GROUPS[:]
     random.shuffle(group_order)
 
-    # Create a single queue
     video_queue = []
     for group in group_order:
         video_queue.extend(grouped_videos[group])
@@ -71,9 +68,9 @@ if expert_name and st.session_state.index < len(st.session_state.video_queue):
         df = pd.concat([df, new_entry], ignore_index=True)
         df.to_csv(OUTPUT_FILE, index=False)
 
-        # Move to next video
+        # Move to next video and trigger rerun
         st.session_state.index += 1
-        st.query_params(dummy=str(st.session_state.index))  # force refresh
+        st.experimental_rerun()   # safe to use here for fresh load
 
 else:
     if expert_name:
