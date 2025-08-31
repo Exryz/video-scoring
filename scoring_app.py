@@ -75,8 +75,9 @@ if expert_name and st.session_state.index < len(st.session_state.video_queue):
     
     st.markdown(iframe_code, unsafe_allow_html=True)
 
-    form_label = st.radio("Form Classification", ["Good Form", "Bad Form"])
-    score = st.slider("Form Quality Score (0–100)", 0, 100, 75)
+    # ✅ Add unique keys to avoid video switching on rerun
+    form_label = st.radio("Form Classification", ["Good Form", "Bad Form"], key=f"form_{st.session_state.index}")
+    score = st.slider("Form Quality Score (0–100)", 0, 100, 75, key=f"score_{st.session_state.index}")
 
     if st.button("💾 Save & Next"):
         df = pd.read_csv(OUTPUT_FILE)
@@ -86,7 +87,6 @@ if expert_name and st.session_state.index < len(st.session_state.video_queue):
 
         if not exists.empty:
             st.warning("⚠️ You already scored this video. Skipping...")
-            st.session_state.index += 1
         else:
             new_entry = pd.DataFrame([{
                 "Expert": expert_name,
@@ -98,8 +98,11 @@ if expert_name and st.session_state.index < len(st.session_state.video_queue):
             df = pd.concat([df, new_entry], ignore_index=True)
             df.to_csv(OUTPUT_FILE, index=False)
 
-            st.success("✅ Score saved! Next video loading...")
-            st.session_state.index += 1
+            st.success("✅ Score saved!")
+
+        # ⬅️ Advance to next video and reload cleanly
+        st.session_state.index += 1
+        st.experimental_rerun()
 
 elif expert_name:
     st.success("🎉 All videos reviewed. Thank you for your evaluation!")
