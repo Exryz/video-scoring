@@ -35,6 +35,22 @@ if not os.path.exists(OUTPUT_FILE):
 st.title("🏋️ Exercise Form Scoring App")
 expert_name = st.text_input("Enter your name (e.g., Airnel, Chris, Andrea):")
 
+# === RUBRICS SIDEBAR ===
+with st.sidebar:
+    st.header("📖 Scoring Rubrics")
+    st.markdown("""
+    **Form Classification (Good / Bad):**  
+    - **Good Form:** Safe and technically sound.  
+    - **Bad Form:** Risk of injury, critical errors.  
+
+    **Form Quality Score (0–100):**
+    - **90–100 (Excellent):** Textbook execution, no visible errors.  
+    - **75–89 (Good):** Minor deviations, overall safe.  
+    - **60–74 (Fair):** Noticeable flaws but rep still completed.  
+    - **40–59 (Poor):** Significant breakdown in form, unsafe tendencies.  
+    - **0–39 (Unsafe):** Major errors, high injury risk, unacceptable form.  
+    """)
+
 if expert_name and st.session_state.index < len(st.session_state.video_queue):
     current_video = st.session_state.video_queue[st.session_state.index]
     exercise_type = current_video["exercise"]
@@ -59,41 +75,31 @@ if expert_name and st.session_state.index < len(st.session_state.video_queue):
     
     st.markdown(iframe_code, unsafe_allow_html=True)
 
-    # Inputs (with unique keys so they reset each video)
-    form_label = st.radio("Form Classification", ["Good Form", "Bad Form"], key=f"form_{st.session_state.index}")
-    score = st.slider("Form Quality Score (0–100)", 0, 100, 75, key=f"score_{st.session_state.index}")
+    form_label = st.radio("Form Classification", ["Good Form", "Bad Form"])
+    score = st.slider("Form Quality Score (0–100)", 0, 100, 75)
 
-    col1, col2 = st.columns(2)
-    with col1:
-        if st.button("💾 Save & Next"):
-            df = pd.read_csv(OUTPUT_FILE)
+    if st.button("💾 Save & Next(Click twice)"):
+        df = pd.read_csv(OUTPUT_FILE)
 
-            # Check for duplicate entry
-            exists = df[(df["Expert"] == expert_name) & (df["Video"] == video_name)]
+        # Check for duplicate entry
+        exists = df[(df["Expert"] == expert_name) & (df["Video"] == video_name)]
 
-            if not exists.empty:
-                st.warning("⚠️ You already scored this video. Skipping...")
-            else:
-                new_entry = pd.DataFrame([{
-                    "Expert": expert_name,
-                    "Video": video_name,
-                    "Exercise": exercise_type,
-                    "Form_Label": form_label,
-                    "Score": score
-                }])
-                df = pd.concat([df, new_entry], ignore_index=True)
-                df.to_csv(OUTPUT_FILE, index=False)
-
-                st.success("✅ Score saved!")
-
-            # Move to next video immediately
+        if not exists.empty:
+            st.warning("⚠️ You already scored this video. Skipping...")
             st.session_state.index += 1
-            st.experimental_rerun()
+        else:
+            new_entry = pd.DataFrame([{
+                "Expert": expert_name,
+                "Video": video_name,
+                "Exercise": exercise_type,
+                "Form_Label": form_label,
+                "Score": score
+            }])
+            df = pd.concat([df, new_entry], ignore_index=True)
+            df.to_csv(OUTPUT_FILE, index=False)
 
-    with col2:
-        if st.button("⬅️ Back") and st.session_state.index > 0:
-            st.session_state.index -= 1
-            st.experimental_rerun()
+            st.success("✅ Score saved! Next video loading...")
+            st.session_state.index += 1
 
 elif expert_name:
     st.success("🎉 All videos reviewed. Thank you for your evaluation!")
