@@ -78,7 +78,7 @@ if expert_name and st.session_state.index < len(st.session_state.video_queue):
     form_label = st.radio("Form Classification", ["Good Form", "Bad Form"])
     score = st.slider("Form Quality Score (0–100)", 0, 100, 75)
 
-    if st.button("💾 Save & Next(Click twice)"):
+    if st.button("💾 Save & Next"):
         df = pd.read_csv(OUTPUT_FILE)
 
         # Check for duplicate entry
