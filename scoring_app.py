@@ -75,34 +75,43 @@ if expert_name and st.session_state.index < len(st.session_state.video_queue):
     
     st.markdown(iframe_code, unsafe_allow_html=True)
 
-    # ✅ Add unique keys to avoid video switching on rerun
-    form_label = st.radio("Form Classification", ["Good Form", "Bad Form"], key=f"form_{st.session_state.index}")
-    score = st.slider("Form Quality Score (0–100)", 0, 100, 75, key=f"score_{st.session_state.index}")
+    # === Persistent Inputs ===
+    if "form_label" not in st.session_state:
+        st.session_state.form_label = "Good Form"
+    if "score" not in st.session_state:
+        st.session_state.score = 75
 
+    st.session_state.form_label = st.radio(
+        "Form Classification", ["Good Form", "Bad Form"],
+        index=0 if st.session_state.form_label == "Good Form" else 1,
+        key="form_label"
+    )
+    st.session_state.score = st.slider(
+        "Form Quality Score (0–100)", 0, 100, st.session_state.score, key="score"
+    )
+
+    # === Save button ===
     if st.button("💾 Save & Next"):
         df = pd.read_csv(OUTPUT_FILE)
 
         # Check for duplicate entry
         exists = df[(df["Expert"] == expert_name) & (df["Video"] == video_name)]
-
         if not exists.empty:
             st.warning("⚠️ You already scored this video. Skipping...")
+            st.session_state.index += 1
         else:
             new_entry = pd.DataFrame([{
                 "Expert": expert_name,
                 "Video": video_name,
                 "Exercise": exercise_type,
-                "Form_Label": form_label,
-                "Score": score
+                "Form_Label": st.session_state.form_label,
+                "Score": st.session_state.score
             }])
             df = pd.concat([df, new_entry], ignore_index=True)
             df.to_csv(OUTPUT_FILE, index=False)
 
-            st.success("✅ Score saved!")
-
-        # ⬅️ Advance to next video and reload cleanly
-        st.session_state.index += 1
-        st.experimental_rerun()
+            st.success("✅ Score saved! Next video loading...")
+            st.session_state.index += 1
 
 elif expert_name:
     st.success("🎉 All videos reviewed. Thank you for your evaluation!")
