@@ -35,6 +35,22 @@ if not os.path.exists(OUTPUT_FILE):
 st.title("🏋️ Exercise Form Scoring App")
 expert_name = st.text_input("Enter your name (e.g., Airnel, Chris, Andrea):")
 
+# === RUBRICS SIDEBAR ===
+with st.sidebar:
+    st.header("📖 Scoring Rubrics")
+    st.markdown("""
+    **Form Classification (Good / Bad):**  
+    - **Good Form:** Safe and technically sound.  
+    - **Bad Form:** Risk of injury, critical errors.  
+
+    **Form Quality Score (0–100):**
+    - **90–100 (Excellent):** Textbook execution, no visible errors.  
+    - **75–89 (Good):** Minor deviations, overall safe.  
+    - **60–74 (Fair):** Noticeable flaws but rep still completed.  
+    - **40–59 (Poor):** Significant breakdown in form, unsafe tendencies.  
+    - **0–39 (Unsafe):** Major errors, high injury risk, unacceptable form.  
+    """)
+
 if expert_name and st.session_state.index < len(st.session_state.video_queue):
     current_video = st.session_state.video_queue[st.session_state.index]
     exercise_type = current_video["exercise"]
