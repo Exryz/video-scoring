@@ -51,6 +51,12 @@ with st.sidebar:
     - **0–39 (Unsafe):** Major errors, high injury risk, unacceptable form.  
     """)
 
+# ==== Persistent inputs ====
+if "form_label" not in st.session_state:
+    st.session_state.form_label = "Good Form"
+if "score" not in st.session_state:
+    st.session_state.score = 75
+
 if expert_name and st.session_state.index < len(st.session_state.video_queue):
     current_video = st.session_state.video_queue[st.session_state.index]
     exercise_type = current_video["exercise"]
@@ -75,27 +81,26 @@ if expert_name and st.session_state.index < len(st.session_state.video_queue):
     
     st.markdown(iframe_code, unsafe_allow_html=True)
 
-    # === Persistent Inputs ===
-    if "form_label" not in st.session_state:
-        st.session_state.form_label = "Good Form"
-    if "score" not in st.session_state:
-        st.session_state.score = 75
-
-    st.session_state.form_label = st.radio(
-        "Form Classification", ["Good Form", "Bad Form"],
+    # Input widgets (bound to session_state automatically)
+    st.radio(
+        "Form Classification",
+        ["Good Form", "Bad Form"],
         index=0 if st.session_state.form_label == "Good Form" else 1,
         key="form_label"
     )
-    st.session_state.score = st.slider(
-        "Form Quality Score (0–100)", 0, 100, st.session_state.score, key="score"
+
+    st.slider(
+        "Form Quality Score (0–100)",
+        0, 100, st.session_state.score,
+        key="score"
     )
 
-    # === Save button ===
     if st.button("💾 Save & Next"):
         df = pd.read_csv(OUTPUT_FILE)
 
         # Check for duplicate entry
         exists = df[(df["Expert"] == expert_name) & (df["Video"] == video_name)]
+
         if not exists.empty:
             st.warning("⚠️ You already scored this video. Skipping...")
             st.session_state.index += 1
@@ -112,6 +117,7 @@ if expert_name and st.session_state.index < len(st.session_state.video_queue):
 
             st.success("✅ Score saved! Next video loading...")
             st.session_state.index += 1
+            st.experimental_rerun()
 
 elif expert_name:
     st.success("🎉 All videos reviewed. Thank you for your evaluation!")
