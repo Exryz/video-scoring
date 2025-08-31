@@ -35,9 +35,8 @@ if not os.path.exists(OUTPUT_FILE):
 st.title("🏋️ Exercise Form Scoring App")
 expert_name = st.text_input("Enter your name (e.g., Airnel, Chris, Andrea):")
 
-# === RUBRICS SIDEBAR ===
-with st.sidebar:
-    st.header("📖 Scoring Rubrics")
+# === RUBRICS (now in expander for mobile) ===
+with st.expander("📖 Scoring Rubrics (tap to expand)"):
     st.markdown("""
     **Form Classification (Good / Bad):**  
     - **Good Form:** Safe and technically sound.  
@@ -70,23 +69,36 @@ if expert_name and st.session_state.index < len(st.session_state.video_queue):
 
     st.subheader(f"Video {st.session_state.index+1}: {exercise_type} - {video_name}")
 
-    # Embed Google Drive video with iframe
+    # Responsive video embed
     if "file/d/" in video_url:
-        iframe_code = f'<iframe src="{video_url}" width="640" height="480" allow="autoplay"></iframe>'
+        iframe_code = f'''
+        <div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;max-width:100%;">
+            <iframe src="{video_url}" 
+                    style="position:absolute;top:0;left:0;width:100%;height:100%;" 
+                    frameborder="0" allowfullscreen></iframe>
+        </div>'''
     elif "uc?export=download&id=" in video_url:
         file_id = video_url.split("id=")[-1]
-        iframe_code = f'<iframe src="https://drive.google.com/file/d/{file_id}/preview" width="640" height="480" allow="autoplay"></iframe>'
+        iframe_code = f'''
+        <div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;max-width:100%;">
+            <iframe src="https://drive.google.com/file/d/{file_id}/preview" 
+                    style="position:absolute;top:0;left:0;width:100%;height:100%;" 
+                    frameborder="0" allowfullscreen></iframe>
+        </div>'''
     else:
-        iframe_code = f'<video width="640" height="480" controls><source src="{video_url}" type="video/mp4"></video>'
-    
+        iframe_code = f'''
+        <video style="width:100%;height:auto;" controls>
+            <source src="{video_url}" type="video/mp4">
+        </video>'''
     st.markdown(iframe_code, unsafe_allow_html=True)
 
-    # Input widgets (bound to session_state automatically)
+    # Input widgets
     st.radio(
         "Form Classification",
         ["Good Form", "Bad Form"],
         index=0 if st.session_state.form_label == "Good Form" else 1,
-        key="form_label"
+        key="form_label",
+        horizontal=True  # ✅ Better on mobile
     )
 
     st.slider(
@@ -94,6 +106,7 @@ if expert_name and st.session_state.index < len(st.session_state.video_queue):
         0, 100, st.session_state.score,
         key="score"
     )
+    st.caption("👉 Slide left = worse form, right = better form")
 
     if st.button("💾 Save & Next"):
         df = pd.read_csv(OUTPUT_FILE)
