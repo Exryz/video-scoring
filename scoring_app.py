@@ -117,7 +117,7 @@ if expert_name and st.session_state.index < len(st.session_state.video_queue):
 
             st.success("✅ Score saved! Next video loading...")
             st.session_state.index += 1
-            st.experimental_rerun()
+            st.rerun()
 
 elif expert_name:
     st.success("🎉 All videos reviewed. Thank you for your evaluation!")
