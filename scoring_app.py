@@ -33,7 +33,7 @@ if not os.path.exists(OUTPUT_FILE):
 
 # ==== APP ====
 st.title("🏋️ Exercise Form Scoring App")
-expert_name = st.text_input("Enter your name (e.g., Airnel, Chris, Andrea):")
+expert_name = st.text_input("Enter your name (e.g., Airnel, Chris, Andrea, Erick):")
 
 # === RUBRICS (now in expander for mobile) ===
 with st.expander("📖 Scoring Rubrics (tap to expand)"):
