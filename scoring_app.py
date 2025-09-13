@@ -2,16 +2,16 @@ import streamlit as st
 import pandas as pd
 import random
 import os
+from github import Github
 from io import StringIO
-from github import Github   # 🔄 GitHub sync
 
 # ==== CONFIG ====
 VIDEO_CSV = "videos.csv"  # tab or comma delimited with Exercise, Video_Name, URL
 OUTPUT_FILE = "expert_scores.csv"
-GITHUB_FILE_PATH = "expert_scores.csv"  # File path in repo
+GITHUB_FILE_PATH = "expert_scores.csv"
 
-# ==== GitHub Push Function ====
-def push_to_github(local_path, commit_message="Append new scores"):
+# ==== GITHUB SYNC FUNCTIONS ====
+def load_scores_from_github():
     token = st.secrets["GITHUB_TOKEN"]
     repo_name = st.secrets["GITHUB_REPO"]
     branch = st.secrets.get("GITHUB_BRANCH", "main")
@@ -19,19 +19,34 @@ def push_to_github(local_path, commit_message="Append new scores"):
     g = Github(token)
     repo = g.get_repo(repo_name)
 
-    # Read new scores
-    new_df = pd.read_csv(local_path)
+    try:
+        contents = repo.get_contents(GITHUB_FILE_PATH, ref=branch)
+        csv_data = contents.decoded_content.decode("utf-8")
+        return pd.read_csv(StringIO(csv_data))
+    except Exception:
+        return pd.DataFrame(columns=["Expert", "Video", "Exercise", "Form_Label", "Score"])
+
+def push_to_github(local_path, commit_message="Update scores"):
+    token = st.secrets["GITHUB_TOKEN"]
+    repo_name = st.secrets["GITHUB_REPO"]
+    branch = st.secrets.get("GITHUB_BRANCH", "main")
+
+    g = Github(token)
+    repo = g.get_repo(repo_name)
+
+    # Load local data (just-updated scores)
+    local_df = pd.read_csv(local_path)
 
     try:
-        # Fetch existing file
         contents = repo.get_contents(GITHUB_FILE_PATH, ref=branch)
         existing_data = contents.decoded_content.decode("utf-8")
         existing_df = pd.read_csv(StringIO(existing_data))
 
-        # Append new scores
-        combined_df = pd.concat([existing_df, new_df], ignore_index=True)
+        # Merge & deduplicate
+        combined_df = pd.concat([existing_df, local_df], ignore_index=True)
+        combined_df.drop_duplicates(subset=["Expert", "Video"], keep="last", inplace=True)
 
-        # Save as CSV string
+        # Save
         csv_buffer = StringIO()
         combined_df.to_csv(csv_buffer, index=False)
 
@@ -42,12 +57,12 @@ def push_to_github(local_path, commit_message="Append new scores"):
             sha=contents.sha,
             branch=branch
         )
-        st.success("✅ Scores synced to GitHub (appended).")
+        st.success("✅ Scores synced to GitHub (deduplicated).")
 
     except Exception:
-        # If file does not exist, create new one
+        # File doesn’t exist → create
         csv_buffer = StringIO()
-        new_df.to_csv(csv_buffer, index=False)
+        local_df.to_csv(csv_buffer, index=False)
         repo.create_file(
             path=GITHUB_FILE_PATH,
             message=commit_message,
@@ -56,13 +71,11 @@ def push_to_github(local_path, commit_message="Append new scores"):
         )
         st.success("🆕 Created expert_scores.csv in GitHub repo.")
 
-
 # ==== LOAD VIDEO LIST ====
 if not os.path.exists(VIDEO_CSV):
     st.error("❌ videos.csv not found. Please upload the file with Exercise, Video_Name, URL.")
     st.stop()
 
-# Auto-detect separator (tab or comma)
 video_df = pd.read_csv(VIDEO_CSV, sep=None, engine="python")
 video_df.columns = video_df.columns.str.strip().str.lower()
 
@@ -71,13 +84,10 @@ if not required_cols.issubset(set(video_df.columns)):
     st.error(f"❌ videos.csv must have columns: {required_cols}. Found: {set(video_df.columns)}")
     st.stop()
 
-# ==== LOAD EXISTING SCORES ====
-if os.path.exists(OUTPUT_FILE):
-    scores_df = pd.read_csv(OUTPUT_FILE)
-else:
-    scores_df = pd.DataFrame(columns=["Expert", "Video", "Exercise", "Form_Label", "Score"])
+# ==== LOAD EXISTING SCORES FROM GITHUB ====
+scores_df = load_scores_from_github()
 
-# ==== VIDEO QUEUE (only unscored videos for current expert) ====
+# ==== VIDEO QUEUE ====
 if "video_queue" not in st.session_state or not st.session_state.video_queue:
     st.session_state.video_queue = []
     st.session_state.index = 0
@@ -92,11 +102,11 @@ if expert_name and not st.session_state.video_queue:
     st.session_state.video_queue = video_list
     st.session_state.index = 0
 
-# ==== CSV INIT ====
+# ==== CSV INIT (local cache) ====
 if not os.path.exists(OUTPUT_FILE):
-    pd.DataFrame(columns=["Expert", "Video", "Exercise", "Form_Label", "Score"]).to_csv(OUTPUT_FILE, index=False)
+    scores_df.to_csv(OUTPUT_FILE, index=False)
 
-# === RUBRICS (now in expander for mobile) ===
+# === RUBRICS ===
 with st.expander("📖 Scoring Rubrics (tap to expand)"):
     st.markdown("""
     **Form Classification (Good / Bad):**  
@@ -117,20 +127,20 @@ if "form_label" not in st.session_state:
 if "score" not in st.session_state:
     st.session_state.score = 75
 
+# ==== VIDEO SCORING ====
 if expert_name and st.session_state.index < len(st.session_state.video_queue):
     current_video = st.session_state.video_queue[st.session_state.index]
     exercise_type = current_video["exercise"]
     video_url = current_video["url"]
     video_name = current_video["video_name"]
 
-    # Progress bar
     progress = (st.session_state.index + 1) / len(st.session_state.video_queue)
     st.progress(progress)
     st.caption(f"Progress: {st.session_state.index+1} of {len(st.session_state.video_queue)} videos")
 
     st.subheader(f"Video {st.session_state.index+1}: {exercise_type} - {video_name}")
 
-    # Responsive video embed
+    # Embed video
     if "file/d/" in video_url:
         iframe_code = f'''
         <div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;max-width:100%;">
@@ -153,7 +163,6 @@ if expert_name and st.session_state.index < len(st.session_state.video_queue):
         </video>'''
     st.markdown(iframe_code, unsafe_allow_html=True)
 
-    # Input widgets
     st.radio(
         "Form Classification",
         ["Good Form", "Bad Form"],
@@ -167,34 +176,29 @@ if expert_name and st.session_state.index < len(st.session_state.video_queue):
         0, 100, st.session_state.score,
         key="score"
     )
-    st.caption("👉 Slide left = worse form, right = better form")
 
     if st.button("💾 Save & Next"):
+        # Add new score
+        new_entry = pd.DataFrame([{
+            "Expert": expert_name,
+            "Video": video_name,
+            "Exercise": exercise_type,
+            "Form_Label": st.session_state.form_label,
+            "Score": st.session_state.score
+        }])
+
+        # Merge into local CSV
         df = pd.read_csv(OUTPUT_FILE)
+        df = pd.concat([df, new_entry], ignore_index=True)
+        df.drop_duplicates(subset=["Expert", "Video"], keep="last", inplace=True)
+        df.to_csv(OUTPUT_FILE, index=False)
 
-        # Check for duplicate entry
-        exists = df[(df["Expert"] == expert_name) & (df["Video"] == video_name)]
+        # Push to GitHub
+        push_to_github(OUTPUT_FILE, commit_message=f"{expert_name} scored {video_name}")
 
-        if not exists.empty:
-            st.warning("⚠️ You already scored this video. Skipping...")
-            st.session_state.index += 1
-        else:
-            new_entry = pd.DataFrame([{
-                "Expert": expert_name,
-                "Video": video_name,
-                "Exercise": exercise_type,
-                "Form_Label": st.session_state.form_label,
-                "Score": st.session_state.score
-            }])
-            df = pd.concat([df, new_entry], ignore_index=True)
-            df.to_csv(OUTPUT_FILE, index=False)
-
-            # 🔄 Push to GitHub
-            push_to_github(OUTPUT_FILE, commit_message=f"Update scores by {expert_name}")
-
-            st.success("✅ Score saved! Next video loading...")
-            st.session_state.index += 1
-            st.rerun()
+        st.success("✅ Score saved & synced! Next video loading...")
+        st.session_state.index += 1
+        st.rerun()
 
 elif expert_name:
     st.success("🎉 All videos reviewed. Thank you for your evaluation!")
@@ -202,7 +206,7 @@ else:
     st.warning("Please enter your name/ID to begin.")
 
 # ==== DOWNLOAD CSV FOR CURRENT EXPERT ====
-if expert_name and os.path.exists(OUTPUT_FILE):
+if expert_name:
     df = pd.read_csv(OUTPUT_FILE)
     expert_df = df[df["Expert"] == expert_name]
 
@@ -216,12 +220,3 @@ if expert_name and os.path.exists(OUTPUT_FILE):
             file_name=f"{expert_name}_scores.csv",
             mime="text/csv"
         )
-
-# ==== RESET DATA OPTION (Admin Use) ====
-st.markdown("---")
-if st.checkbox("⚠️ Show admin options"):
-    if st.button("🔄 Reset Data"):
-        pd.DataFrame(columns=["Expert", "Video", "Exercise", "Form_Label", "Score"]).to_csv(OUTPUT_FILE, index=False)
-        st.session_state.video_queue = []
-        st.session_state.index = 0
-        st.success("✅ All data has been reset. Restart the app to begin fresh.")
