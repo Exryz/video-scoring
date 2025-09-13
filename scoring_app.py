@@ -1,34 +1,21 @@
 import streamlit as st
 import pandas as pd
 import random
-import gspread
-from oauth2client.service_account import ServiceAccountCredentials
+import os
 
 # ==== CONFIG ====
 VIDEO_CSV = "videos.csv"  # tab or comma delimited with Exercise, Video_Name, URL
-
-# ==== GOOGLE SHEETS AUTH ====
-def get_gsheet(sheet_name):
-    scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-    creds = ServiceAccountCredentials.from_json_keyfile_name("artful-shelter-472011-c4-aafeee859c9d.json", scope)
-    client = gspread.authorize(creds)
-    return client.open(sheet_name).sheet1  # open first sheet
-
-def save_score_to_sheet(expert_name, video_name, exercise_type, form_label, score):
-    try:
-        sheet = get_gsheet(f"{expert_name}_Scores")  # Match sheet name with expert
-        sheet.append_row([expert_name, video_name, exercise_type, form_label, score])
-    except Exception as e:
-        st.error(f"❌ Could not save to Google Sheets: {e}")
+OUTPUT_FILE = "expert_scores.csv"
 
 # ==== LOAD VIDEO LIST ====
-try:
-    video_df = pd.read_csv(VIDEO_CSV, sep=None, engine="python")
-except Exception:
-    st.error("❌ videos.csv not found or invalid. Please upload the file with Exercise, Video_Name, URL.")
+if not os.path.exists(VIDEO_CSV):
+    st.error("❌ videos.csv not found. Please upload the file with Exercise, Video_Name, URL.")
     st.stop()
 
+# Auto-detect separator (tab or comma)
+video_df = pd.read_csv(VIDEO_CSV, sep=None, engine="python")
 video_df.columns = video_df.columns.str.strip().str.lower()
+
 required_cols = {"exercise", "video_name", "url"}
 if not required_cols.issubset(set(video_df.columns)):
     st.error(f"❌ videos.csv must have columns: {required_cols}. Found: {set(video_df.columns)}")
@@ -39,6 +26,10 @@ if "video_queue" not in st.session_state or not st.session_state.video_queue:
     random.shuffle(video_list)
     st.session_state.video_queue = video_list
     st.session_state.index = 0
+
+# ==== CSV INIT ====
+if not os.path.exists(OUTPUT_FILE):
+    pd.DataFrame(columns=["Expert", "Video", "Exercise", "Form_Label", "Score"]).to_csv(OUTPUT_FILE, index=False)
 
 # ==== APP ====
 st.title("🏋️ Exercise Form Scoring App")
@@ -107,7 +98,7 @@ if expert_name and st.session_state.index < len(st.session_state.video_queue):
         ["Good Form", "Bad Form"],
         index=0 if st.session_state.form_label == "Good Form" else 1,
         key="form_label",
-        horizontal=True
+        horizontal=True  # ✅ Better on mobile
     )
 
     st.slider(
@@ -118,12 +109,55 @@ if expert_name and st.session_state.index < len(st.session_state.video_queue):
     st.caption("👉 Slide left = worse form, right = better form")
 
     if st.button("💾 Save & Next"):
-        save_score_to_sheet(expert_name, video_name, exercise_type, st.session_state.form_label, st.session_state.score)
-        st.success("✅ Saved to Google Sheets in real-time!")
-        st.session_state.index += 1
-        st.rerun()
+        df = pd.read_csv(OUTPUT_FILE)
+
+        # Check for duplicate entry
+        exists = df[(df["Expert"] == expert_name) & (df["Video"] == video_name)]
+
+        if not exists.empty:
+            st.warning("⚠️ You already scored this video. Skipping...")
+            st.session_state.index += 1
+        else:
+            new_entry = pd.DataFrame([{
+                "Expert": expert_name,
+                "Video": video_name,
+                "Exercise": exercise_type,
+                "Form_Label": st.session_state.form_label,
+                "Score": st.session_state.score
+            }])
+            df = pd.concat([df, new_entry], ignore_index=True)
+            df.to_csv(OUTPUT_FILE, index=False)
+
+            st.success("✅ Score saved! Next video loading...")
+            st.session_state.index += 1
+            st.rerun()
 
 elif expert_name:
     st.success("🎉 All videos reviewed. Thank you for your evaluation!")
 else:
     st.warning("Please enter your name/ID to begin.")
+
+# ==== DOWNLOAD CSV FOR CURRENT EXPERT ====
+if expert_name and os.path.exists(OUTPUT_FILE):
+    df = pd.read_csv(OUTPUT_FILE)
+    expert_df = df[df["Expert"] == expert_name]
+
+    if expert_df.empty:
+        st.info("ℹ️ No scores recorded yet for your ID.")
+    else:
+        csv = expert_df.to_csv(index=False).encode('utf-8')
+        st.download_button(
+            f"📥 Download Your Scores ({len(expert_df)} entries)",
+            csv,
+            file_name=f"{expert_name}_scores.csv",
+            mime="text/csv"
+        )
+
+# ==== RESET DATA OPTION (Admin Use) ====
+st.markdown("---")
+if st.checkbox("⚠️ Show admin options"):
+    if st.button("🔄 Reset Data"):
+        pd.DataFrame(columns=["Expert", "Video", "Exercise", "Form_Label", "Score"]).to_csv(OUTPUT_FILE, index=False)
+        st.session_state.video_queue = []
+        st.session_state.index = 0
+        st.success("✅ All data has been reset. Restart the app to begin fresh.")
