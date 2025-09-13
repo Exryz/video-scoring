@@ -21,8 +21,23 @@ if not required_cols.issubset(set(video_df.columns)):
     st.error(f"❌ videos.csv must have columns: {required_cols}. Found: {set(video_df.columns)}")
     st.stop()
 
+# ==== LOAD EXISTING SCORES ====
+if os.path.exists(OUTPUT_FILE):
+    scores_df = pd.read_csv(OUTPUT_FILE)
+else:
+    scores_df = pd.DataFrame(columns=["Expert", "Video", "Exercise", "Form_Label", "Score"])
+
+# ==== VIDEO QUEUE (only unscored videos for current expert) ====
 if "video_queue" not in st.session_state or not st.session_state.video_queue:
-    video_list = video_df.to_dict("records")
+    st.session_state.video_queue = []
+    st.session_state.index = 0
+
+st.title("🏋️ Exercise Form Scoring App")
+expert_name = st.text_input("Enter your name (e.g., Airnel, Chris, Andrea, Erick):")
+
+if expert_name and not st.session_state.video_queue:
+    scored_videos = scores_df[scores_df["Expert"] == expert_name]["Video"].tolist()
+    video_list = video_df[~video_df["video_name"].isin(scored_videos)].to_dict("records")
     random.shuffle(video_list)
     st.session_state.video_queue = video_list
     st.session_state.index = 0
@@ -30,10 +45,6 @@ if "video_queue" not in st.session_state or not st.session_state.video_queue:
 # ==== CSV INIT ====
 if not os.path.exists(OUTPUT_FILE):
     pd.DataFrame(columns=["Expert", "Video", "Exercise", "Form_Label", "Score"]).to_csv(OUTPUT_FILE, index=False)
-
-# ==== APP ====
-st.title("🏋️ Exercise Form Scoring App")
-expert_name = st.text_input("Enter your name (e.g., Airnel, Chris, Andrea, Erick):")
 
 # === RUBRICS (now in expander for mobile) ===
 with st.expander("📖 Scoring Rubrics (tap to expand)"):
