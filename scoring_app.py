@@ -2,10 +2,30 @@ import streamlit as st
 import pandas as pd
 import random
 import os
+from github import Github   # 🔄 GitHub sync
 
 # ==== CONFIG ====
 VIDEO_CSV = "videos.csv"  # tab or comma delimited with Exercise, Video_Name, URL
 OUTPUT_FILE = "expert_scores.csv"
+
+# ==== GITHUB HELPER ====
+def push_to_github(file_path, commit_message="Update scores"):
+    token = st.secrets["GITHUB_TOKEN"]
+    repo_name = st.secrets["GITHUB_REPO"]
+    branch = st.secrets.get("GITHUB_BRANCH", "main")
+
+    g = Github(token)
+    repo = g.get_repo(repo_name)
+
+    with open(file_path, "r", encoding="utf-8") as f:
+        content = f.read()
+
+    try:
+        contents = repo.get_contents(file_path, ref=branch)
+        repo.update_file(contents.path, commit_message, content, contents.sha, branch=branch)
+    except Exception:
+        repo.create_file(file_path, commit_message, content, branch=branch)
+
 
 # ==== LOAD VIDEO LIST ====
 if not os.path.exists(VIDEO_CSV):
@@ -82,14 +102,7 @@ if expert_name and st.session_state.index < len(st.session_state.video_queue):
 
     # Responsive video embed
     if "file/d/" in video_url:
-        iframe_code = f'''
-        <div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;max-width:100%;">
-            <iframe src="{video_url}" 
-                    style="position:absolute;top:0;left:0;width:100%;height:100%;" 
-                    frameborder="0" allowfullscreen></iframe>
-        </div>'''
-    elif "uc?export=download&id=" in video_url:
-        file_id = video_url.split("id=")[-1]
+        file_id = video_url.split("file/d/")[-1].split("/")[0]
         iframe_code = f'''
         <div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;max-width:100%;">
             <iframe src="https://drive.google.com/file/d/{file_id}/preview" 
@@ -109,7 +122,7 @@ if expert_name and st.session_state.index < len(st.session_state.video_queue):
         ["Good Form", "Bad Form"],
         index=0 if st.session_state.form_label == "Good Form" else 1,
         key="form_label",
-        horizontal=True  # ✅ Better on mobile
+        horizontal=True
     )
 
     st.slider(
@@ -119,6 +132,7 @@ if expert_name and st.session_state.index < len(st.session_state.video_queue):
     )
     st.caption("👉 Slide left = worse form, right = better form")
 
+    # ==== SAVE & NEXT (with GitHub sync) ====
     if st.button("💾 Save & Next"):
         df = pd.read_csv(OUTPUT_FILE)
 
@@ -139,7 +153,14 @@ if expert_name and st.session_state.index < len(st.session_state.video_queue):
             df = pd.concat([df, new_entry], ignore_index=True)
             df.to_csv(OUTPUT_FILE, index=False)
 
-            st.success("✅ Score saved! Next video loading...")
+            # 🔄 Push to GitHub
+            try:
+                push_to_github(OUTPUT_FILE, f"{expert_name} scored {video_name}")
+                st.success("✅ Score saved & pushed to GitHub! Next video loading...")
+            except Exception as e:
+                st.error(f"❌ Failed to push to GitHub: {e}")
+                st.info("The score was saved locally, but not synced to GitHub.")
+
             st.session_state.index += 1
             st.rerun()
 
