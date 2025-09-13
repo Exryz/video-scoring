@@ -2,14 +2,16 @@ import streamlit as st
 import pandas as pd
 import random
 import os
+from io import StringIO
 from github import Github   # 🔄 GitHub sync
 
 # ==== CONFIG ====
 VIDEO_CSV = "videos.csv"  # tab or comma delimited with Exercise, Video_Name, URL
 OUTPUT_FILE = "expert_scores.csv"
+GITHUB_FILE_PATH = "expert_scores.csv"  # File path in repo
 
-# ==== GITHUB HELPER ====
-def push_to_github(file_path, commit_message="Update scores"):
+# ==== GitHub Push Function ====
+def push_to_github(local_path, commit_message="Append new scores"):
     token = st.secrets["GITHUB_TOKEN"]
     repo_name = st.secrets["GITHUB_REPO"]
     branch = st.secrets.get("GITHUB_BRANCH", "main")
@@ -17,14 +19,42 @@ def push_to_github(file_path, commit_message="Update scores"):
     g = Github(token)
     repo = g.get_repo(repo_name)
 
-    with open(file_path, "r", encoding="utf-8") as f:
-        content = f.read()
+    # Read new scores
+    new_df = pd.read_csv(local_path)
 
     try:
-        contents = repo.get_contents(file_path, ref=branch)
-        repo.update_file(contents.path, commit_message, content, contents.sha, branch=branch)
+        # Fetch existing file
+        contents = repo.get_contents(GITHUB_FILE_PATH, ref=branch)
+        existing_data = contents.decoded_content.decode("utf-8")
+        existing_df = pd.read_csv(StringIO(existing_data))
+
+        # Append new scores
+        combined_df = pd.concat([existing_df, new_df], ignore_index=True)
+
+        # Save as CSV string
+        csv_buffer = StringIO()
+        combined_df.to_csv(csv_buffer, index=False)
+
+        repo.update_file(
+            path=contents.path,
+            message=commit_message,
+            content=csv_buffer.getvalue(),
+            sha=contents.sha,
+            branch=branch
+        )
+        st.success("✅ Scores synced to GitHub (appended).")
+
     except Exception:
-        repo.create_file(file_path, commit_message, content, branch=branch)
+        # If file does not exist, create new one
+        csv_buffer = StringIO()
+        new_df.to_csv(csv_buffer, index=False)
+        repo.create_file(
+            path=GITHUB_FILE_PATH,
+            message=commit_message,
+            content=csv_buffer.getvalue(),
+            branch=branch
+        )
+        st.success("🆕 Created expert_scores.csv in GitHub repo.")
 
 
 # ==== LOAD VIDEO LIST ====
@@ -102,7 +132,14 @@ if expert_name and st.session_state.index < len(st.session_state.video_queue):
 
     # Responsive video embed
     if "file/d/" in video_url:
-        file_id = video_url.split("file/d/")[-1].split("/")[0]
+        iframe_code = f'''
+        <div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;max-width:100%;">
+            <iframe src="{video_url}" 
+                    style="position:absolute;top:0;left:0;width:100%;height:100%;" 
+                    frameborder="0" allowfullscreen></iframe>
+        </div>'''
+    elif "uc?export=download&id=" in video_url:
+        file_id = video_url.split("id=")[-1]
         iframe_code = f'''
         <div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;max-width:100%;">
             <iframe src="https://drive.google.com/file/d/{file_id}/preview" 
@@ -132,7 +169,6 @@ if expert_name and st.session_state.index < len(st.session_state.video_queue):
     )
     st.caption("👉 Slide left = worse form, right = better form")
 
-    # ==== SAVE & NEXT (with GitHub sync) ====
     if st.button("💾 Save & Next"):
         df = pd.read_csv(OUTPUT_FILE)
 
@@ -154,13 +190,9 @@ if expert_name and st.session_state.index < len(st.session_state.video_queue):
             df.to_csv(OUTPUT_FILE, index=False)
 
             # 🔄 Push to GitHub
-            try:
-                push_to_github(OUTPUT_FILE, f"{expert_name} scored {video_name}")
-                st.success("✅ Score saved & pushed to GitHub! Next video loading...")
-            except Exception as e:
-                st.error(f"❌ Failed to push to GitHub: {e}")
-                st.info("The score was saved locally, but not synced to GitHub.")
+            push_to_github(OUTPUT_FILE, commit_message=f"Update scores by {expert_name}")
 
+            st.success("✅ Score saved! Next video loading...")
             st.session_state.index += 1
             st.rerun()
 
