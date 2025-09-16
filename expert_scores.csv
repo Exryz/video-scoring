@@ -32,7 +32,7 @@ Chris,cleanpress_007-6.mp4,cleanpress,Good Form,81
 Chris,deadlift_010-02.mp4,deadlift,Good Form,56
 Chris,deadlift_006-09.mp4,deadlift,Good Form,84
 Chris,deadlift_010-04.mp4,deadlift,Good Form,78
-Chris,deadlift_007-8.mp4,deadlift,Bad Form,78
+Chris,deadlift_007-8.mp4,deadlift,Bad Form,48
 Chris,sprint_008-1.mp4,sprint,Good Form,74
 Chris,cleanpress_002-4.mp4,cleanpress,Good Form,67
 Chris,deadlift_018-8.mp4,deadlift,Good Form,56
@@ -72,7 +72,7 @@ Chris,deadlift_020-6.mp4,deadlift,Good Form,83
 Chris,deadlift_001-4.mp4,deadlift,Good Form,57
 Chris,cleanpress_003-8.mp4,cleanpress,Good Form,91
 Chris,deadlift_026-8.mp4,deadlift,Bad Form,41
-Chris,cleanpress_002-7.mp4,cleanpress,Bad Form,80
+Chris,cleanpress_002-7.mp4,cleanpress,Good Form,67
 Chris,deadlift_004-7.mp4,deadlift,Good Form,88
 Chris,sprint_002-1.mp4,sprint,Good Form,72
 Chris,deadlift_004-1.mp4,deadlift,Good Form,87
@@ -95,9 +95,9 @@ Chris,cleanpress_007-5.mp4,cleanpress,Good Form,84
 Chris,cleanpress_008-7.mp4,cleanpress,Good Form,84
 Chris,cleanpress_012-10.mp4,cleanpress,Good Form,84
 Chris,cleanpress_012-04.mp4,cleanpress,Good Form,84
-Chris,deadlift_011-1.mp4,deadlift,Bad Form,84
+Chris,deadlift_011-1.mp4,deadlift,Bad Form,34
 Chris,cleanpress_001-8.mp4,cleanpress,Bad Form,49
-Chris,deadlift_003-3.mp4,deadlift,Bad Form,86
+Chris,deadlift_003-3.mp4,deadlift,Good Form,86
 Chris,cleanpress_005-5.mp4,cleanpress,Bad Form,27
 Chris,deadlift_026-7.mp4,deadlift,Bad Form,27
 Chris,deadlift_011-5.mp4,deadlift,Bad Form,27
@@ -189,9 +189,9 @@ Chris,deadlift_012-5.mp4,deadlift,Good Form,75
 Chris,cleanpress_009-4.mp4,cleanpress,Good Form,75
 Chris,deadlift_020-7.mp4,deadlift,Good Form,75
 Chris,cleanpress_004-3.mp4,cleanpress,Good Form,75
-Chris,deadlift_008-7.mp4,deadlift,Bad Form,75
-Chris,cleanpress_008-1.mp4,cleanpress,Bad Form,75
-Chris,cleanpress_001-3.mp4,cleanpress,Bad Form,75
+Chris,deadlift_008-7.mp4,deadlift,Good Form,75
+Chris,cleanpress_008-1.mp4,cleanpress,Bad Form,45
+Chris,cleanpress_001-3.mp4,cleanpress,Bad Form,45
 Chris,sprint_020-1.mp4,sprint,Good Form,51
 Chris,cleanpress_003-4.mp4,cleanpress,Good Form,51
 Chris,deadlift_025-2.mp4,deadlift,Good Form,58
@@ -342,10 +342,10 @@ Airnel Abarra,cleanpress_010-2.mp4,cleanpress,Bad Form,65
 Airnel Abarra,deadlift_017-7.mp4,deadlift,Good Form,91
 Airnel Abarra,deadlift_019-5.mp4,deadlift,Good Form,91
 Airnel Abarra,cleanpress_013-5.mp4,cleanpress,Bad Form,31
-Airnel Abarra,deadlift_004-7.mp4,deadlift,Bad Form,91
-Airnel Abarra,deadlift_018-9.mp4,deadlift,Bad Form,94
+Airnel Abarra,deadlift_004-7.mp4,deadlift,Good Form,91
+Airnel Abarra,deadlift_018-9.mp4,deadlift,Good Form,94
 Airnel Abarra,cleanpress_008-5.mp4,cleanpress,Bad Form,62
-Airnel Abarra,deadlift_011-1.mp4,deadlift,Bad Form,85
+Airnel Abarra,deadlift_011-1.mp4,deadlift,Bad Form,35
 Airnel Abarra,deadlift_017-6.mp4,deadlift,Good Form,85
 Airnel Abarra,sprint_007-1.mp4,sprint,Good Form,87
 Airnel Abarra,cleanpress_007-6.mp4,cleanpress,Good Form,76
@@ -355,10 +355,10 @@ Airnel Abarra,deadlift_010-08.mp4,deadlift,Good Form,94
 Airnel Abarra,cleanpress_004-6.mp4,cleanpress,Good Form,94
 Airnel Abarra,deadlift_005-1.mp4,deadlift,Good Form,94
 Airnel Abarra,deadlift_021-6.mp4,deadlift,Bad Form,48
-Airnel Abarra,deadlift_018-4.mp4,deadlift,Bad Form,74
-Airnel Abarra,deadlift_011-5.mp4,deadlift,Bad Form,86
-Airnel Abarra,cleanpress_004-3.mp4,cleanpress,Bad Form,86
-Airnel Abarra,cleanpress_014-6.mp4,cleanpress,Bad Form,88
+Airnel Abarra,deadlift_018-4.mp4,deadlift,Good Form,74
+Airnel Abarra,deadlift_011-5.mp4,deadlift,Bad Form,46
+Airnel Abarra,cleanpress_004-3.mp4,cleanpress,Bad Form,66
+Airnel Abarra,cleanpress_014-6.mp4,cleanpress,Good Form,88
 Airnel Abarra,deadlift_012-6.mp4,deadlift,Good Form,88
 Airnel Abarra,deadlift_025-3.mp4,deadlift,Good Form,85
 Airnel Abarra,deadlift_001-5.mp4,deadlift,Good Form,83
@@ -382,19 +382,19 @@ Airnel Abarra,deadlift_005-6.mp4,deadlift,Good Form,90
 Airnel Abarra,deadlift_020-5.mp4,deadlift,Good Form,90
 Airnel Abarra,cleanpress_005-5.mp4,cleanpress,Good Form,84
 Airnel Abarra,deadlift_010-06.mp4,deadlift,Good Form,75
-Airnel Abarra,deadlift_024-6.mp4,deadlift,Bad Form,75
+Airnel Abarra,deadlift_024-6.mp4,deadlift,Good Form,75
 Airnel Abarra,cleanpress_012-05.mp4,cleanpress,Good Form,75
 Airnel Abarra,sprint_012-1.mp4,sprint,Good Form,70
 Airnel Abarra,cleanpress_015-6.mp4,cleanpress,Good Form,77
 Airnel Abarra,deadlift_015-03.mp4,deadlift,Good Form,66
 Airnel Abarra,deadlift_024-1.mp4,deadlift,Bad Form,64
-Airnel Abarra,cleanpress_002-8.mp4,cleanpress,Bad Form,82
-Airnel Abarra,cleanpress_006-5.mp4,cleanpress,Bad Form,89
-Airnel Abarra,cleanpress_012-08.mp4,cleanpress,Bad Form,89
-Airnel Abarra,deadlift_002-1.mp4,deadlift,Bad Form,90
-Airnel Abarra,deadlift_023-2.mp4,deadlift,Bad Form,90
-Airnel Abarra,cleanpress_004-5.mp4,cleanpress,Bad Form,90
-Airnel Abarra,deadlift_008-7.mp4,deadlift,Bad Form,88
+Airnel Abarra,cleanpress_002-8.mp4,cleanpress,Good Form,82
+Airnel Abarra,cleanpress_006-5.mp4,cleanpress,Bad Form,69
+Airnel Abarra,cleanpress_012-08.mp4,cleanpress,Good Form,79
+Airnel Abarra,deadlift_002-1.mp4,deadlift,Good Form,90
+Airnel Abarra,deadlift_023-2.mp4,deadlift,Good Form,90
+Airnel Abarra,cleanpress_004-5.mp4,cleanpress,Bad Form,40
+Airnel Abarra,deadlift_008-7.mp4,deadlift,Good Form,88
 Airnel Abarra,deadlift_006-02.mp4,deadlift,Good Form,83
 Airnel Abarra,deadlift_006-07.mp4,deadlift,Good Form,86
 Airnel Abarra,cleanpress_004-7.mp4,cleanpress,Good Form,89
@@ -409,38 +409,38 @@ Airnel Abarra,deadlift_003-6.mp4,deadlift,Good Form,82
 Airnel Abarra,deadlift_023-3.mp4,deadlift,Good Form,80
 Airnel Abarra,cleanpress_012-01.mp4,cleanpress,Good Form,69
 Airnel Abarra,cleanpress_013-1.mp4,cleanpress,Good Form,77
-Airnel Abarra,deadlift_016-3.mp4,deadlift,Bad Form,75
+Airnel Abarra,deadlift_016-3.mp4,deadlift,Good Form,75
 Airnel Abarra,cleanpress_011-9.mp4,cleanpress,Good Form,59
 Airnel Abarra,cleanpress_014-7.mp4,cleanpress,Good Form,70
 Airnel Abarra,deadlift_020-8.mp4,deadlift,Good Form,75
 Airnel Abarra,cleanpress_001-8.mp4,cleanpress,Bad Form,69
-Airnel Abarra,cleanpress_005-7.mp4,cleanpress,Bad Form,85
+Airnel Abarra,cleanpress_005-7.mp4,cleanpress,Good Form,85
 Airnel Abarra,cleanpress_007-1.mp4,cleanpress,Good Form,89
 Airnel Abarra,deadlift_023-7.mp4,deadlift,Good Form,89
 Airnel Abarra,deadlift_001-7.mp4,deadlift,Good Form,89
-Airnel Abarra,sprint_025-1.mp4,sprint,Bad Form,75
+Airnel Abarra,sprint_025-1.mp4,sprint,Bad Form,64
 Airnel Abarra,deadlift_023-6.mp4,deadlift,Good Form,75
 Airnel Abarra,cleanpress_007-7.mp4,cleanpress,Good Form,89
 Airnel Abarra,cleanpress_003-3.mp4,cleanpress,Good Form,89
-Airnel Abarra,deadlift_025-4.mp4,deadlift,Bad Form,84
-Airnel Abarra,sprint_016-2.mp4,sprint,Bad Form,88
+Airnel Abarra,deadlift_025-4.mp4,deadlift,Good Form,84
+Airnel Abarra,sprint_016-2.mp4,sprint,Bad Form,58
 Airnel Abarra,deadlift_017-3.mp4,deadlift,Good Form,71
 Airnel Abarra,cleanpress_015-2.mp4,cleanpress,Good Form,62
-Airnel Abarra,cleanpress_008-1.mp4,cleanpress,Bad Form,75
-Airnel Abarra,deadlift_020-3.mp4,deadlift,Bad Form,82
+Airnel Abarra,cleanpress_008-1.mp4,cleanpress,Bad Form,63
+Airnel Abarra,deadlift_020-3.mp4,deadlift,Good Form,82
 Airnel Abarra,deadlift_023-5.mp4,deadlift,Good Form,74
-Airnel Abarra,deadlift_011-8.mp4,deadlift,Bad Form,78
+Airnel Abarra,deadlift_011-8.mp4,deadlift,Bad Form,48
 Airnel Abarra,cleanpress_012-10.mp4,cleanpress,Good Form,87
 Airnel Abarra,cleanpress_008-7.mp4,cleanpress,Good Form,87
 Airnel Abarra,deadlift_019-4.mp4,deadlift,Good Form,89
 Airnel Abarra,deadlift_013-7.mp4,deadlift,Good Form,89
 Airnel Abarra,deadlift_025-1.mp4,deadlift,Good Form,79
-Airnel Abarra,cleanpress_006-4.mp4,cleanpress,Bad Form,75
-Airnel Abarra,cleanpress_003-6.mp4,cleanpress,Bad Form,75
+Airnel Abarra,cleanpress_006-4.mp4,cleanpress,Bad Form,65
+Airnel Abarra,cleanpress_003-6.mp4,cleanpress,Good Form,75
 Airnel Abarra,deadlift_009-3.mp4,deadlift,Good Form,83
 Airnel Abarra,cleanpress_013-6.mp4,cleanpress,Good Form,83
 Airnel Abarra,deadlift_025-2.mp4,deadlift,Good Form,88
-Airnel Abarra,cleanpress_013-2.mp4,cleanpress,Bad Form,77
+Airnel Abarra,cleanpress_013-2.mp4,cleanpress,Bad Form,57
 Airnel Abarra,sprint_018-1.mp4,sprint,Good Form,72
 Airnel Abarra,deadlift_026-5.mp4,deadlift,Good Form,83
 Airnel Abarra,deadlift_009-8.mp4,deadlift,Good Form,83
@@ -454,10 +454,10 @@ Airnel Abarra,deadlift_012-3.mp4,deadlift,Good Form,68
 Airnel Abarra,cleanpress_010-3.mp4,cleanpress,Good Form,83
 Airnel Abarra,deadlift_007-6.mp4,deadlift,Good Form,83
 Airnel Abarra,deadlift_026-3.mp4,deadlift,Bad Form,67
-Airnel Abarra,deadlift_013-5.mp4,deadlift,Bad Form,79
+Airnel Abarra,deadlift_013-5.mp4,deadlift,Good Form,79
 Airnel Abarra,deadlift_015-07.mp4,deadlift,Good Form,85
 Airnel Abarra,sprint_017-1.mp4,sprint,Good Form,85
-Airnel Abarra,cleanpress_015-8.mp4,cleanpress,Bad Form,75
+Airnel Abarra,cleanpress_015-8.mp4,cleanpress,Good Form,75
 Airnel Abarra,deadlift_022-8.mp4,deadlift,Good Form,85
 Airnel Abarra,deadlift_024-3.mp4,deadlift,Good Form,85
 Airnel Abarra,cleanpress_013-3.mp4,cleanpress,Bad Form,64
@@ -471,8 +471,8 @@ Airnel Abarra,deadlift_012-5.mp4,deadlift,Good Form,82
 Airnel Abarra,deadlift_003-2.mp4,deadlift,Good Form,82
 Airnel Abarra,deadlift_005-4.mp4,deadlift,Good Form,86
 Airnel Abarra,deadlift_003-8.mp4,deadlift,Good Form,86
-Airnel Abarra,sprint_020-1.mp4,sprint,Bad Form,75
-Airnel Abarra,sprint_005-1.mp4,sprint,Bad Form,75
+Airnel Abarra,sprint_020-1.mp4,sprint,Bad Form,55
+Airnel Abarra,sprint_005-1.mp4,sprint,Bad Form,45
 Airnel Abarra,cleanpress_001-3.mp4,cleanpress,Good Form,75
 Airnel Abarra,cleanpress_006-8.mp4,cleanpress,Good Form,67
 Airnel Abarra,cleanpress_003-5.mp4,cleanpress,Good Form,80
@@ -511,7 +511,7 @@ Airnel Abarra,cleanpress_011-2.mp4,cleanpress,Bad Form,46
 Airnel Abarra,deadlift_018-8.mp4,deadlift,Good Form,77
 Airnel Abarra,sprint_014-1.mp4,sprint,Good Form,77
 Airnel Abarra,deadlift_015-08.mp4,deadlift,Bad Form,66
-Airnel Abarra,cleanpress_014-8.mp4,cleanpress,Bad Form,78
+Airnel Abarra,cleanpress_014-8.mp4,cleanpress,Good Form,78
 Airnel Abarra,sprint_006-1.mp4,sprint,Good Form,87
 Airnel Abarra,deadlift_003-5.mp4,deadlift,Good Form,87
 Airnel Abarra,cleanpress_004-4.mp4,cleanpress,Bad Form,58
@@ -657,7 +657,7 @@ Chris,deadlift_006-01.mp4,deadlift,Good Form,83
 Chris,sprint_033-1.mp4,sprint,Good Form,87
 Chris,deadlift_004-2.mp4,deadlift,Good Form,95
 Chris,cleanpress_012-06.mp4,cleanpress,Good Form,77
-Chris,cleanpress_010-1.mp4,cleanpress,Bad Form,75
+Chris,cleanpress_010-1.mp4,cleanpress,Bad Form,69
 Chris,deadlift_020-8.mp4,deadlift,Good Form,91
 Chris,deadlift_013-4.mp4,deadlift,Good Form,88
 Chris,sprint_023-1.mp4,sprint,Bad Form,62
@@ -671,7 +671,7 @@ Chris,cleanpress_001-6.mp4,cleanpress,Bad Form,66
 Chris,deadlift_019-8.mp4,deadlift,Good Form,82
 Chris,deadlift_005-3.mp4,deadlift,Good Form,75
 Chris,deadlift_024-6.mp4,deadlift,Bad Form,66
-Chris,deadlift_007-4.mp4,deadlift,Bad Form,75
+Chris,deadlift_007-4.mp4,deadlift,Bad Form,65
 Chris,sprint_017-1.mp4,sprint,Good Form,87
 Chris,sprint_012-1.mp4,sprint,Bad Form,49
 Chris,deadlift_015-02.mp4,deadlift,Good Form,75
